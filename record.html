@@ -16,14 +16,16 @@
 </head>
 <body>
     <div class="app">
-        <header class="header record-header">
-            <button class="date-nav-btn" onclick="App.navigateDate(-1)">&#9664;</button>
-            <div class="header-center">
-                <h1>今日记录</h1>
-                <div class="date-display" id="recordDate"></div>
+        <header class="header" style="padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;">
+                <button class="date-nav-btn" onclick="App.navigateDate(-1)">&#9664;</button>
+                <div style="flex:1;text-align:center;">
+                    <div style="font-size:18px;font-weight:600;color:white;">今日记录</div>
+                    <div class="date-display" id="recordDate"></div>
+                </div>
+                <button class="save-top-btn" onclick="App.saveAndStay()">保存</button>
+                <button class="date-nav-btn" onclick="App.navigateDate(1)">&#9654;</button>
             </div>
-            <button class="save-top-btn" onclick="App.saveAndStay()">保存</button>
-            <button class="date-nav-btn" onclick="App.navigateDate(1)">&#9654;</button>
         </header>
         
         <main class="content record-content">
