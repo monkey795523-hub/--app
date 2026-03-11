@@ -103,63 +103,78 @@ const App = {
         const form = document.getElementById('recordForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            this.saveRecord();
+            const ok = this.doSave();
+            if (ok) {
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }
         });
     },
     
+    // 核心保存函数，只负责保存，不负责跳转，返回是否成功
+    doSave() {
+        try {
+            const dateStr = this.currentRecordDate;
+            if (!dateStr) {
+                alert('保存失败：日期丢失，请重新进入记录页面');
+                return false;
+            }
+            const now = new Date();
+            const symptoms = [];
+            document.querySelectorAll('input[name="symptom"]:checked').forEach(cb => {
+                symptoms.push(cb.value);
+            });
+            const triggers = [];
+            document.querySelectorAll('.tag.selected').forEach(tag => {
+                triggers.push(tag.getAttribute('data-value'));
+            });
+            const impactEls = document.querySelectorAll('input[name="impact"]:checked');
+            const impact = impactEls.length > 0 ? impactEls[0].value : null;
+            const periodEls = document.querySelectorAll('input[name="period"]:checked');
+            const period = periodEls.length > 0 ? periodEls[0].value : 'none';
+            const record = {
+                date: dateStr,
+                timestamp: now.getTime(),
+                mood: parseInt(document.getElementById('mood').value),
+                energy: parseInt(document.getElementById('energy').value),
+                sleep: {
+                    difficulty: parseInt(document.getElementById('sleepDifficulty').value),
+                    duration: parseFloat(document.getElementById('sleepDuration').value),
+                    earlyWake: document.getElementById('earlyWake').checked,
+                    nightmare: document.getElementById('nightmare').checked
+                },
+                desires: {
+                    appetite: parseInt(document.getElementById('appetite').value),
+                    motivation: parseInt(document.getElementById('motivation').value),
+                    social: parseInt(document.getElementById('social').value),
+                    physical: parseInt(document.getElementById('physical').value)
+                },
+                triggers: triggers,
+                triggerDesc: document.getElementById('triggerDesc').value,
+                impact: impact,
+                symptoms: symptoms,
+                coping: document.getElementById('coping').value,
+                highlight: document.getElementById('highlight').value,
+                weight: parseFloat(document.getElementById('weight').value) || null,
+                period: period
+            };
+            this.setRecord(dateStr, record);
+            this.recordSaved = true;
+            this.showToast('保存成功！');
+            return true;
+        } catch (err) {
+            alert('保存出错：' + err.message);
+            return false;
+        }
+    },
+    
+    // 兼容旧调用
     saveRecord() {
-        const dateStr = this.currentRecordDate;
-        const now = new Date();
-        const symptoms = [];
-        document.querySelectorAll('input[name="symptom"]:checked').forEach(cb => {
-            symptoms.push(cb.value);
-        });
-        
-        const triggers = [];
-        document.querySelectorAll('.tag.selected').forEach(tag => {
-            triggers.push(tag.getAttribute('data-value'));
-        });
-        
-        const impactEls = document.querySelectorAll('input[name="impact"]:checked');
-        const impact = impactEls.length > 0 ? impactEls[0].value : null;
-        
-        const periodEls = document.querySelectorAll('input[name="period"]:checked');
-        const period = periodEls.length > 0 ? periodEls[0].value : 'none';
-        
-        const record = {
-            date: dateStr,
-            timestamp: now.getTime(),
-            mood: parseInt(document.getElementById('mood').value),
-            energy: parseInt(document.getElementById('energy').value),
-            sleep: {
-                difficulty: parseInt(document.getElementById('sleepDifficulty').value),
-                duration: parseFloat(document.getElementById('sleepDuration').value),
-                earlyWake: document.getElementById('earlyWake').checked,
-                nightmare: document.getElementById('nightmare').checked
-            },
-            desires: {
-                appetite: parseInt(document.getElementById('appetite').value),
-                motivation: parseInt(document.getElementById('motivation').value),
-                social: parseInt(document.getElementById('social').value),
-                physical: parseInt(document.getElementById('physical').value)
-            },
-            triggers: triggers,
-            triggerDesc: document.getElementById('triggerDesc').value,
-            impact: impact,
-            symptoms: symptoms,
-            coping: document.getElementById('coping').value,
-            highlight: document.getElementById('highlight').value,
-            weight: parseFloat(document.getElementById('weight').value) || null,
-            period: period
-        };
-        
-        this.setRecord(dateStr, record);
-        this.showToast('保存成功！');
-        this.recordSaved = true;
-        
-        setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
+        const ok = this.doSave();
+        if (ok) {
+            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+        }
     },
     
     fillForm(record) {
@@ -548,10 +563,13 @@ const App = {
     },
     
     leaveWithSave() {
-        this.saveRecord();
-        setTimeout(() => {
-            window.location.href = this.leaveTarget || 'index.html';
-        }, 800);
+        const ok = this.doSave();
+        const target = this.leaveTarget || 'index.html';
+        if (ok) {
+            setTimeout(() => {
+                window.location.href = target;
+            }, 1000);
+        }
     },
     
     leaveWithoutSave() {
