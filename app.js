@@ -384,7 +384,7 @@ const App = {
     
     initStats() {
         this.currentChart = 'mood';
-        this.currentDays = 30;
+        this.currentDays = 7;
         this.renderChart();
         
         document.querySelectorAll('.chart-btn').forEach(btn => {
