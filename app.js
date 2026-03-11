@@ -65,27 +65,24 @@ const App = {
     },
     
     initRecord() {
-        let dateStr = null;
-        
         const selectedDate = localStorage.getItem('selectedDate');
         if (selectedDate) {
-            dateStr = selectedDate;
+            this.currentRecordDate = selectedDate;
             localStorage.removeItem('selectedDate');
         } else {
-            const today = new Date();
-            dateStr = this.formatDate(today);
+            this.currentRecordDate = this.formatDate(new Date());
         }
         
-        const dateObj = new Date(dateStr);
+        const dateObj = new Date(this.currentRecordDate);
         document.getElementById('recordDate').textContent = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
         
-        const existingRecord = this.getRecord(dateStr);
+        const existingRecord = this.getRecord(this.currentRecordDate);
         if (existingRecord) {
             this.fillForm(existingRecord);
         }
         
         this.bindSliders();
-        this.bindForm(dateStr);
+        this.bindForm();
     },
     
     bindSliders() {
@@ -100,15 +97,16 @@ const App = {
         });
     },
     
-    bindForm(currentDateStr) {
+    bindForm() {
         const form = document.getElementById('recordForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            this.saveRecord(currentDateStr);
+            this.saveRecord();
         });
     },
     
-    saveRecord(currentDateStr) {
+    saveRecord() {
+        const dateStr = this.currentRecordDate;
         const symptoms = [];
         document.querySelectorAll('input[name="symptom"]:checked').forEach(cb => {
             symptoms.push(cb.value);
@@ -152,7 +150,7 @@ const App = {
             period: period
         };
         
-        this.setRecord(currentDateStr, record);
+        this.setRecord(dateStr, record);
         this.showToast('保存成功！');
         
         setTimeout(() => {
@@ -285,23 +283,6 @@ const App = {
                     dot.className = 'period-dot';
                     cell.appendChild(dot);
                 }
-                
-                cell.addEventListener('click', () => {
-                    const now = Date.now();
-                    const timeDiff = now - this.lastClickTime;
-                    
-                    if (timeDiff < 250 && timeDiff > 0) {
-                        clearTimeout(this.calendarClickTimer);
-                        this.goToRecord(dateStr);
-                        this.lastClickTime = 0;
-                    } else {
-                        clearTimeout(this.calendarClickTimer);
-                        this.calendarClickTimer = setTimeout(() => {
-                            this.showDayDetail(dateStr, record);
-                        }, 250);
-                        this.lastClickTime = now;
-                    }
-                });
             }
             
             if (day === today.getDate() && m === today.getMonth() && year === today.getFullYear()) {
@@ -311,6 +292,21 @@ const App = {
             cell.addEventListener('click', () => {
                 document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
                 cell.classList.add('selected');
+                
+                const now = Date.now();
+                const timeDiff = now - this.lastClickTime;
+                
+                if (timeDiff < 300 && timeDiff > 0) {
+                    clearTimeout(this.calendarClickTimer);
+                    this.goToRecord(dateStr);
+                    this.lastClickTime = 0;
+                } else {
+                    this.lastClickTime = now;
+                    if (record) {
+                        clearTimeout(this.calendarClickTimer);
+                        this.calendarClickTimer = setTimeout(() => {}, 300);
+                    }
+                }
             });
             
             grid.appendChild(cell);
