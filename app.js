@@ -160,9 +160,9 @@ const App = {
             const record = {
                 date: dateStr,
                 timestamp: now.getTime(),
-                mood: parseInt(document.getElementById('mood').value),
+                mood: parseFloat(document.getElementById('mood').value),
                 moodNote: document.getElementById('moodNote')?.value || '',
-                energy: parseInt(document.getElementById('energy').value),
+                energy: parseFloat(document.getElementById('energy').value),
                 energyNote: document.getElementById('energyNote')?.value || '',
                 emotions: emotions,
                 emotionNote: document.getElementById('emotionNote')?.value || '',
@@ -174,10 +174,10 @@ const App = {
                 },
                 sleepNote: document.getElementById('sleepNote')?.value || '',
                 desires: {
-                    appetite: parseInt(document.getElementById('appetite').value),
-                    motivation: parseInt(document.getElementById('motivation').value),
-                    social: parseInt(document.getElementById('social').value),
-                    physical: parseInt(document.getElementById('physical').value)
+                    appetite: parseFloat(document.getElementById('appetite').value),
+                    motivation: parseFloat(document.getElementById('motivation').value),
+                    social: parseFloat(document.getElementById('social').value),
+                    physical: parseFloat(document.getElementById('physical').value)
                 },
                 desireNote: document.getElementById('desireNote')?.value || '',
                 triggers: triggers,
