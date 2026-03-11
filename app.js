@@ -284,21 +284,34 @@ const App = {
                 }
                 
                 let clickTimer = null;
-                cell.addEventListener('click', () => {
-                    clickTimer = setTimeout(() => {
-                        this.showDayDetail(dateStr, record);
-                    }, 250);
-                });
+                let lastClickTime = 0;
                 
-                cell.addEventListener('dblclick', () => {
-                    clearTimeout(clickTimer);
-                    this.goToRecord(dateStr);
+                cell.addEventListener('click', (e) => {
+                    const now = Date.now();
+                    const timeDiff = now - lastClickTime;
+                    
+                    if (timeDiff < 250 && timeDiff > 0) {
+                        clearTimeout(clickTimer);
+                        this.goToRecord(dateStr);
+                        lastClickTime = 0;
+                    } else {
+                        clearTimeout(clickTimer);
+                        clickTimer = setTimeout(() => {
+                            this.showDayDetail(dateStr, record);
+                        }, 250);
+                        lastClickTime = now;
+                    }
                 });
             }
             
             if (day === today.getDate() && m === today.getMonth() && year === today.getFullYear()) {
-                cell.style.border = '3px solid #667eea';
+                cell.classList.add('today');
             }
+            
+            cell.addEventListener('click', () => {
+                document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+                cell.classList.add('selected');
+            });
             
             grid.appendChild(cell);
         }

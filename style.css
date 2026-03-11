@@ -591,6 +591,7 @@ body {
     transition: transform 0.2s;
     position: relative;
     -webkit-tap-highlight-color: transparent;
+    border: 2px solid transparent;
 }
 
 .day-cell:active {
@@ -600,6 +601,15 @@ body {
 .day-cell.empty {
     background: transparent;
     cursor: default;
+}
+
+.day-cell.today {
+    border: 3px solid #667eea;
+}
+
+.day-cell.selected {
+    border: 3px solid #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
 }
 
 .day-number {
