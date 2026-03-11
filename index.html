@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>心情日记</title>
+    <link rel="stylesheet" href="style.css">
+<style>
+    .tab-icon-img, .header-logo {
+        object-fit: contain;
+    }
+    .tab-icon-img {
+        width: 50px;
+        height: 50px;
+    }
+    .header-logo {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+    <div class="app">
+  <header class="header">
+    <img src="images/logo.png" alt="Logo" class="header-logo">
+    <h1>心情日记</h1>
+</header>
+        
+        <main class="content home-content">
+            <div class="today-card">
+                <div class="today-date" id="todayDate"></div>
+                <div class="today-mood" id="todayMood">
+                    <span class="mood-label">今天的心情</span>
+                    <span class="mood-value">未记录</span>
+                </div>
+                <button class="record-btn" onclick="location.href='record.html'">
+                    📝 记录今天
+                </button>
+            </div>
+            
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="avgMood">--</span>
+                    <span class="stat-label">平均心情</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="recordDays">--</span>
+                    <span class="stat-label">记录天数</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="bestDay">--</span>
+                    <span class="stat-label">最佳状态</span>
+                </div>
+            </div>
+            
+            <div class="feature-grid">
+                <div class="feature-item" onclick="location.href='calendar.html'">
+                    <span style="font-size: 40px;">📅</span>
+                    <span>日历视图</span>
+                </div>
+                <div class="feature-item" onclick="location.href='stats.html'">
+                    <span style="font-size: 40px;">📊</span>
+                    <span>数据趋势</span>
+                </div>
+            </div>
+        </main>
+        
+       <nav class="tab-bar">
+    <div class="tab-item active" onclick="location.href='index.html'">
+        <img src="images/home.png" alt="首页" class="tab-icon-img">
+        <span class="tab-label">首页</span>
+    </div>
+    <div class="tab-item" onclick="location.href='calendar.html'">
+        <img src="images/calendar.png" alt="日历" class="tab-icon-img">
+        <span class="tab-label">日历</span>
+    </div>
+    <div class="tab-item" onclick="location.href='record.html'">
+        <img src="images/record.png" alt="记录" class="tab-icon-img">
+        <span class="tab-label">记录</span>
+    </div>
+    <div class="tab-item" onclick="location.href='stats.html'">
+        <img src="images/stats.png" alt="统计" class="tab-icon-img">
+        <span class="tab-label">统计</span>
+    </div>
+</nav>
+    
+    <script src="app.js"></script>
+</body>
+</html>

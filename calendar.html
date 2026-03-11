@@ -1,0 +1,82 @@
+<!-- calendar.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>心情日历</title>
+    <link rel="stylesheet" href="style.css">
+<style>
+    .tab-icon-img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+    }
+</style>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>📅 心情日历</h1>
+        </header>
+        
+        <main class="content calendar-content">
+            <div class="calendar-nav">
+                <button class="nav-btn" id="prevMonth">◀</button>
+                <h2 class="month-title" id="monthTitle"></h2>
+                <button class="nav-btn" id="nextMonth">▶</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item">
+                    <span class="legend-color low"></span>
+                    <span>低落</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color calm"></span>
+                    <span>平静</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color happy"></span>
+                    <span>开心</span>
+                </div>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="weekday-row">
+                    <div class="weekday">日</div>
+                    <div class="weekday">一</div>
+                    <div class="weekday">二</div>
+                    <div class="weekday">三</div>
+                    <div class="weekday">四</div>
+                    <div class="weekday">五</div>
+                    <div class="weekday">六</div>
+                </div>
+                <div class="days-grid" id="daysGrid"></div>
+            </div>
+        </main>
+        
+        <nav class="tab-bar">
+    <div class="tab-item" onclick="location.href='index.html'">
+        <img src="images/home.png" alt="首页" class="tab-icon-img">
+        <span class="tab-label">首页</span>
+    </div>
+    <div class="tab-item active" onclick="location.href='calendar.html'">
+        <img src="images/calendar.png" alt="日历" class="tab-icon-img">
+        <span class="tab-label">日历</span>
+    </div>
+    <div class="tab-item" onclick="location.href='record.html'">
+        <img src="images/record.png" alt="记录" class="tab-icon-img">
+        <span class="tab-label">记录</span>
+    </div>
+    <div class="tab-item" onclick="location.href='stats.html'">
+        <img src="images/stats.png" alt="统计" class="tab-icon-img">
+        <span class="tab-label">统计</span>
+    </div>
+</nav>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
