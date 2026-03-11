@@ -16,9 +16,16 @@
 </head>
 <body>
     <div class="app">
-        <header class="header">
-            <h1>今日记录</h1>
-            <div class="date-display" id="recordDate"></div>
+        <header class="header record-header">
+            <button class="date-nav-btn" onclick="App.navigateDate(-1)">&#9664;</button>
+            <div class="header-center">
+                <h1>今日记录</h1>
+                <div class="date-display" id="recordDate"></div>
+            </div>
+            <div class="header-right-group">
+                <button class="date-nav-btn" onclick="App.navigateDate(1)">&#9654;</button>
+                <button class="save-top-btn" onclick="App.saveAndStay()">保存</button>
+            </div>
         </header>
         
         <main class="content record-content">
@@ -217,7 +224,6 @@
                     <div class="period-predict" id="periodPredict"></div>
                 </div>
                 
-                <button type="submit" class="submit-btn">保存记录</button>
             </form>
         </main>
         

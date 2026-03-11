@@ -641,6 +641,29 @@ const App = {
         setTimeout(() => toast.remove(), 2000);
     },
     
+    // 保存并留在当前页（顶部保存按鈕）
+    saveAndStay() {
+        this.doSave();
+    },
+    
+    // 切换前后日期（offset: -1 上一天 / +1 下一天）
+    navigateDate(offset) {
+        const base = this.currentRecordDate || this.formatDate(new Date());
+        const dateObj = new Date(base + 'T12:00:00');
+        dateObj.setDate(dateObj.getDate() + offset);
+        const newDate = this.formatDate(dateObj);
+        this._pendingNavDate = newDate;
+        
+        if (this.formDirty && !this.recordSaved) {
+            this.leaveTarget = '__dateNav__';
+            const modal = document.getElementById('leaveModal');
+            if (modal) { modal.style.display = 'flex'; }
+            else { this.goToRecord(newDate); }
+        } else {
+            this.goToRecord(newDate);
+        }
+    },
+    
     goToRecord(dateStr) {
         localStorage.setItem('selectedDate', dateStr);
         window.location.href = 'record.html';
@@ -663,17 +686,26 @@ const App = {
     
     leaveWithSave() {
         const ok = this.doSave();
-        const target = this.leaveTarget || 'index.html';
+        const target = this.leaveTarget;
         if (ok) {
             setTimeout(() => {
-                window.location.href = target;
+                if (target === '__dateNav__') {
+                    this.goToRecord(this._pendingNavDate);
+                } else {
+                    window.location.href = target || 'calendar.html';
+                }
             }, 1000);
         }
     },
-    
+        
     leaveWithoutSave() {
-        window.location.href = this.leaveTarget || 'index.html';
-    }
+        const target = this.leaveTarget;
+        if (target === '__dateNav__') {
+            this.goToRecord(this._pendingNavDate);
+        } else {
+            window.location.href = target || 'calendar.html';
+        }
+    },
 };
 
 App.init();
