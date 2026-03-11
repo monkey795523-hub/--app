@@ -389,88 +389,126 @@ const App = {
         
         const ctx = canvas.getContext('2d');
         const records = this.getDataForChart(this.currentDays);
+        const dpr = window.devicePixelRatio || 1;
         
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        // 容器可视宽度
+        const scroll = document.getElementById('chartScroll');
+        const containerW = scroll ? scroll.clientWidth : 320;
+        const containerH = scroll ? scroll.clientHeight : 230;
         
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 每个数据点至少 65px 宽，数据多时自动拓宽可滚动
+        const pointSpacing = 65;
+        const totalW = records.length > 1 ? Math.max(containerW, records.length * pointSpacing) : containerW;
+        
+        // 设置 css 尺寸（展示尺寸）
+        canvas.style.width  = totalW + 'px';
+        canvas.style.height = containerH + 'px';
+        // 设置物理像素（高清修复）
+        canvas.width  = totalW * dpr;
+        canvas.height = containerH * dpr;
+        ctx.scale(dpr, dpr);
+        
+        ctx.clearRect(0, 0, totalW, containerH);
         
         if (records.length < 2) {
             ctx.fillStyle = '#999';
             ctx.font = '14px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('数据不足，请继续记录', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('数据不足，请继续记录', totalW / 2, containerH / 2);
             return;
         }
         
-        const padding = 40;
-        const chartWidth = canvas.width - padding * 2;
-        const chartHeight = canvas.height - padding * 2;
+        const paddingL = 45;
+        const paddingR = 20;
+        const paddingT = 30;
+        const paddingB = 35;
+        const chartWidth  = totalW - paddingL - paddingR;
+        const chartHeight = containerH - paddingT - paddingB;
         
-        const maxValue = 10;
-        const minValue = 0;
+        const maxVal = 10;
+        const minVal = 0;
+        const xStep  = records.length > 1 ? chartWidth / (records.length - 1) : chartWidth;
         
-        const xStep = chartWidth / (records.length - 1);
+        // 网格线 + Y 轴刻度
+        ctx.strokeStyle = '#f0f0f0';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 10; i += 2) {
+            const y = paddingT + chartHeight - (i / 10) * chartHeight;
+            ctx.beginPath();
+            ctx.moveTo(paddingL, y);
+            ctx.lineTo(totalW - paddingR, y);
+            ctx.stroke();
+            ctx.fillStyle = '#aaa';
+            ctx.font = `${11 * dpr / dpr}px Arial`;
+            ctx.textAlign = 'right';
+            ctx.fillText(i.toString(), paddingL - 6, y + 4);
+        }
+        
+        // 渐变填充区域
+        const grad = ctx.createLinearGradient(0, paddingT, 0, paddingT + chartHeight);
+        grad.addColorStop(0, 'rgba(102,126,234,0.25)');
+        grad.addColorStop(1, 'rgba(102,126,234,0)');
         
         ctx.beginPath();
+        records.forEach((point, i) => {
+            const x = paddingL + i * xStep;
+            const y = paddingT + chartHeight - ((point.value - minVal) / (maxVal - minVal)) * chartHeight;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        });
+        // 闭合到底部填充
+        const lastX = paddingL + (records.length - 1) * xStep;
+        ctx.lineTo(lastX, paddingT + chartHeight);
+        ctx.lineTo(paddingL, paddingT + chartHeight);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+        
+        // 折线
+        ctx.beginPath();
         ctx.strokeStyle = '#667eea';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
-        
-        records.forEach((point, index) => {
-            const x = padding + index * xStep;
-            const y = padding + chartHeight - ((point.value - minValue) / (maxValue - minValue)) * chartHeight;
-            
-            if (index === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
+        records.forEach((point, i) => {
+            const x = paddingL + i * xStep;
+            const y = paddingT + chartHeight - ((point.value - minVal) / (maxVal - minVal)) * chartHeight;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
         });
         ctx.stroke();
         
-        records.forEach((point, index) => {
-            const x = padding + index * xStep;
-            const y = padding + chartHeight - ((point.value - minValue) / (maxValue - minValue)) * chartHeight;
+        // 数据点 + 标签
+        records.forEach((point, i) => {
+            const x = paddingL + i * xStep;
+            const y = paddingT + chartHeight - ((point.value - minVal) / (maxVal - minVal)) * chartHeight;
             
             ctx.beginPath();
-            ctx.arc(x, y, 6, 0, Math.PI * 2);
-            ctx.fillStyle = '#667eea';
+            ctx.arc(x, y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = 'white';
             ctx.fill();
-            
-            ctx.fillStyle = '#333';
-            ctx.font = '10px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(point.date.slice(5), x, y - 15);
-        });
-        
-        ctx.strokeStyle = '#e0e0e0';
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= 10; i += 2) {
-            const y = padding + chartHeight - (i / 10) * chartHeight;
-            ctx.beginPath();
-            ctx.moveTo(padding, y);
-            ctx.lineTo(canvas.width - padding, y);
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
             ctx.stroke();
             
-            ctx.fillStyle = '#999';
+            // 数值标签
+            ctx.fillStyle = '#667eea';
+            ctx.font = 'bold 11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(point.value % 1 === 0 ? point.value : point.value.toFixed(1), x, y - 12);
+            
+            // 日期标签
+            ctx.fillStyle = '#888';
             ctx.font = '10px Arial';
-            ctx.textAlign = 'right';
-            ctx.fillText(i.toString(), padding - 5, y + 3);
-        }
+            ctx.fillText(point.date.slice(5), x, paddingT + chartHeight + 20);
+        });
         
-        let sum = 0;
-        let max = -Infinity;
-        let min = Infinity;
+        // 统计摘要
+        let sum = 0, max = -Infinity, min = Infinity;
         records.forEach(r => {
             sum += r.value;
             if (r.value > max) max = r.value;
             if (r.value < min) min = r.value;
         });
-        
-        const avg = sum / records.length;
-        document.getElementById('avgValue').textContent = avg.toFixed(1);
+        document.getElementById('avgValue').textContent = (sum / records.length).toFixed(1);
         document.getElementById('maxValue').textContent = max.toFixed(1);
         document.getElementById('minValue').textContent = min.toFixed(1);
     },
