@@ -356,6 +356,24 @@ body {
     border-color: #88d8b0;
 }
 
+/* 补充说明输入框：更小更紧凑 */
+.note-input {
+    min-height: 48px;
+    font-size: 14px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    background: #f9fbfa;
+    border-color: #edf7f1;
+}
+
+/* 主情绪状态标签区 */
+.emotion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
 .impact-level {
     margin-top: 15px;
 }

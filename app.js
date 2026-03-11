@@ -130,8 +130,12 @@ const App = {
             document.querySelectorAll('input[name="symptom"]:checked').forEach(cb => {
                 symptoms.push(cb.value);
             });
+            const emotions = [];
+            document.querySelectorAll('.tag[data-type="emotion"].selected').forEach(tag => {
+                emotions.push(tag.getAttribute('data-value'));
+            });
             const triggers = [];
-            document.querySelectorAll('.tag.selected').forEach(tag => {
+            document.querySelectorAll('.tag[data-type="trigger"].selected').forEach(tag => {
                 triggers.push(tag.getAttribute('data-value'));
             });
             const impactEls = document.querySelectorAll('input[name="impact"]:checked');
@@ -142,23 +146,30 @@ const App = {
                 date: dateStr,
                 timestamp: now.getTime(),
                 mood: parseInt(document.getElementById('mood').value),
+                moodNote: document.getElementById('moodNote')?.value || '',
                 energy: parseInt(document.getElementById('energy').value),
+                energyNote: document.getElementById('energyNote')?.value || '',
+                emotions: emotions,
+                emotionNote: document.getElementById('emotionNote')?.value || '',
                 sleep: {
                     difficulty: parseInt(document.getElementById('sleepDifficulty').value),
                     duration: parseFloat(document.getElementById('sleepDuration').value),
                     earlyWake: document.getElementById('earlyWake').checked,
                     nightmare: document.getElementById('nightmare').checked
                 },
+                sleepNote: document.getElementById('sleepNote')?.value || '',
                 desires: {
                     appetite: parseInt(document.getElementById('appetite').value),
                     motivation: parseInt(document.getElementById('motivation').value),
                     social: parseInt(document.getElementById('social').value),
                     physical: parseInt(document.getElementById('physical').value)
                 },
+                desireNote: document.getElementById('desireNote')?.value || '',
                 triggers: triggers,
                 triggerDesc: document.getElementById('triggerDesc').value,
                 impact: impact,
                 symptoms: symptoms,
+                symptomNote: document.getElementById('symptomNote')?.value || '',
                 coping: document.getElementById('coping').value,
                 highlight: document.getElementById('highlight').value,
                 weight: parseFloat(document.getElementById('weight').value) || null,
@@ -189,22 +200,33 @@ const App = {
             document.getElementById('mood').value = record.mood;
             document.getElementById('moodValue').textContent = record.mood;
         }
+        if (record.moodNote) { const el = document.getElementById('moodNote'); if (el) el.value = record.moodNote; }
         if (record.energy !== undefined) {
             document.getElementById('energy').value = record.energy;
             document.getElementById('energyValue').textContent = record.energy;
         }
+        if (record.energyNote) { const el = document.getElementById('energyNote'); if (el) el.value = record.energyNote; }
+        if (record.emotions) {
+            record.emotions.forEach(e => {
+                const tag = document.querySelector(`.tag[data-type="emotion"][data-value="${e}"]`);
+                if (tag) tag.classList.add('selected');
+            });
+        }
+        if (record.emotionNote) { const el = document.getElementById('emotionNote'); if (el) el.value = record.emotionNote; }
         if (record.sleep) {
             if (record.sleep.difficulty !== undefined) document.getElementById('sleepDifficulty').value = record.sleep.difficulty;
             if (record.sleep.duration !== undefined) document.getElementById('sleepDuration').value = record.sleep.duration;
             if (record.sleep.earlyWake) document.getElementById('earlyWake').checked = true;
             if (record.sleep.nightmare) document.getElementById('nightmare').checked = true;
         }
+        if (record.sleepNote) { const el = document.getElementById('sleepNote'); if (el) el.value = record.sleepNote; }
         if (record.desires) {
             if (record.desires.appetite !== undefined) document.getElementById('appetite').value = record.desires.appetite;
             if (record.desires.motivation !== undefined) document.getElementById('motivation').value = record.desires.motivation;
             if (record.desires.social !== undefined) document.getElementById('social').value = record.desires.social;
             if (record.desires.physical !== undefined) document.getElementById('physical').value = record.desires.physical;
         }
+        if (record.desireNote) { const el = document.getElementById('desireNote'); if (el) el.value = record.desireNote; }
         if (record.triggers) {
             record.triggers.forEach(t => {
                 const tag = document.querySelector(`.tag[data-value="${t}"]`);
@@ -222,6 +244,7 @@ const App = {
                 if (cb) cb.checked = true;
             });
         }
+        if (record.symptomNote) { const el = document.getElementById('symptomNote'); if (el) el.value = record.symptomNote; }
         if (record.coping) document.getElementById('coping').value = record.coping;
         if (record.highlight) document.getElementById('highlight').value = record.highlight;
         if (record.weight) document.getElementById('weight').value = record.weight;
