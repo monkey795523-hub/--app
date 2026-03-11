@@ -185,8 +185,14 @@ const App = {
     },
     
     fillForm(record) {
-        if (record.mood) document.getElementById('mood').value = record.mood;
-        if (record.energy) document.getElementById('energy').value = record.energy;
+        if (record.mood !== undefined) {
+            document.getElementById('mood').value = record.mood;
+            document.getElementById('moodValue').textContent = record.mood;
+        }
+        if (record.energy !== undefined) {
+            document.getElementById('energy').value = record.energy;
+            document.getElementById('energyValue').textContent = record.energy;
+        }
         if (record.sleep) {
             if (record.sleep.difficulty !== undefined) document.getElementById('sleepDifficulty').value = record.sleep.difficulty;
             if (record.sleep.duration !== undefined) document.getElementById('sleepDuration').value = record.sleep.duration;
@@ -224,8 +230,6 @@ const App = {
             if (periodRadio) periodRadio.checked = true;
         }
         
-        document.getElementById('moodValue').textContent = record.mood || 5;
-        document.getElementById('energyValue').textContent = record.energy || 5;
         ['appetite', 'motivation', 'social', 'physical'].forEach(id => {
             const el = document.getElementById(`${id}Value`);
             if (el && record.desires && record.desires[id] !== undefined) {
@@ -585,3 +589,10 @@ const App = {
 };
 
 App.init();
+
+// 修复手机浏览器 bfcache 问题：页面从缓存恢复时重新初始化
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+        App.loadPage();
+    }
+});
