@@ -16,9 +16,16 @@
 </head>
 <body>
     <div class="app">
-        <header class="header">
-            <h1>今日记录</h1>
-            <div class="date-display" id="recordDate"></div>
+        <header class="header" style="padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));">
+            <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:8px;">
+                <button class="date-nav-btn" onclick="App.navigateDate(-1)">&#9664;</button>
+                <div style="flex:1;text-align:center;">
+                    <div style="font-size:18px;font-weight:600;color:white;">今日记录</div>
+                    <div class="date-display" id="recordDate"></div>
+                </div>
+                <button class="save-top-btn" onclick="App.saveAndStay()">保存</button>
+                <button class="date-nav-btn" onclick="App.navigateDate(1)">&#9654;</button>
+            </div>
         </header>
         
         <main class="content record-content">
@@ -26,23 +33,44 @@
                 <div class="form-section">
                     <h3 class="section-title">😊 主观感受</h3>
                     <div class="slider-container">
-                        <input type="range" id="mood" min="0" max="10" value="5" class="slider">
+                        <input type="range" id="mood" min="0" max="10" value="5" step="0.5" class="slider">
                         <div class="slider-value">
                             <span id="moodValue">5</span>
                             <span class="slider-label">0 - 极度低落 → 10 - 极度开心</span>
                         </div>
                     </div>
+                    <textarea id="moodNote" placeholder="补充说明（可选）" class="textarea-input note-input"></textarea>
                 </div>
                 
                 <div class="form-section">
                     <h3 class="section-title">⚡ 精力水平</h3>
                     <div class="slider-container">
-                        <input type="range" id="energy" min="0" max="10" value="5" class="slider">
+                        <input type="range" id="energy" min="0" max="10" value="5" step="0.5" class="slider">
                         <div class="slider-value">
                             <span id="energyValue">5</span>
                             <span class="slider-label">0 - 精疲力竭 → 10 - 精力充沛</span>
                         </div>
                     </div>
+                    <textarea id="energyNote" placeholder="补充说明（可选）" class="textarea-input note-input"></textarea>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">💭 主情绪状态</h3>
+                    <div class="emotion-tags" id="emotionTags">
+                        <span class="tag" data-type="emotion" data-value="崩溃">💔 崩溃</span>
+                        <span class="tag" data-type="emotion" data-value="焦虑">😰 焦虑</span>
+                        <span class="tag" data-type="emotion" data-value="低落">😞 低落</span>
+                        <span class="tag" data-type="emotion" data-value="烦躁">😤 烦躁</span>
+                        <span class="tag" data-type="emotion" data-value="麻木">😶 麻木</span>
+                        <span class="tag" data-type="emotion" data-value="平稳">🙌 平稳</span>
+                        <span class="tag" data-type="emotion" data-value="轻松">😊 轻松</span>
+                        <span class="tag" data-type="emotion" data-value="话多">💬 话多</span>
+                        <span class="tag" data-type="emotion" data-value="开心">😄 开心</span>
+                        <span class="tag" data-type="emotion" data-value="亢奋">🤩 亢奋</span>
+                        <span class="tag" data-type="emotion" data-value="满足">😇 满足</span>
+                        <span class="tag" data-type="emotion" data-value="幸福">💖 幸福</span>
+                    </div>
+                    <textarea id="emotionNote" placeholder="补充说明（可选）" class="textarea-input note-input"></textarea>
                 </div>
                 
                 <div class="form-section">
@@ -71,6 +99,7 @@
                             </label>
                         </div>
                     </div>
+                    <textarea id="sleepNote" placeholder="补充说明（可选）" class="textarea-input note-input"></textarea>
                 </div>
                 
                 <div class="form-section">
@@ -78,25 +107,26 @@
                     <div class="desire-grid">
                         <div class="desire-item">
                             <label>食欲</label>
-                            <input type="range" id="appetite" min="0" max="10" value="5" class="slider-small">
+                            <input type="range" id="appetite" min="0" max="10" value="5" step="0.5" class="slider-small">
                             <span id="appetiteValue">5</span>
                         </div>
                         <div class="desire-item">
                             <label>做事欲</label>
-                            <input type="range" id="motivation" min="0" max="10" value="5" class="slider-small">
+                            <input type="range" id="motivation" min="0" max="10" value="5" step="0.5" class="slider-small">
                             <span id="motivationValue">5</span>
                         </div>
                         <div class="desire-item">
                             <label>社交欲</label>
-                            <input type="range" id="social" min="0" max="10" value="5" class="slider-small">
+                            <input type="range" id="social" min="0" max="10" value="5" step="0.5" class="slider-small">
                             <span id="socialValue">5</span>
                         </div>
                         <div class="desire-item">
                             <label>身体欲望</label>
-                            <input type="range" id="physical" min="0" max="10" value="5" class="slider-small">
+                            <input type="range" id="physical" min="0" max="10" value="5" step="0.5" class="slider-small">
                             <span id="physicalValue">5</span>
                         </div>
                     </div>
+                    <textarea id="desireNote" placeholder="补充说明（可选）" class="textarea-input note-input"></textarea>
                 </div>
                 
                 <div class="form-section">
@@ -154,6 +184,7 @@
                             <input type="checkbox" name="symptom" value="头痛"> 🤕 头痛
                         </label>
                     </div>
+                    <textarea id="symptomNote" placeholder="补充说明（可选）" class="textarea-input note-input"></textarea>
                 </div>
                 
                 <div class="form-section">
@@ -193,30 +224,44 @@
                     <div class="period-predict" id="periodPredict"></div>
                 </div>
                 
-                <button type="submit" class="submit-btn">保存记录</button>
             </form>
         </main>
         
        <nav class="tab-bar">
-    <div class="tab-item" onclick="location.href='index.html'">
+    <div class="tab-item" onclick="App.confirmLeave('index.html')">
         <img src="images/home.png" alt="首页" class="tab-icon-img">
         <span class="tab-label">首页</span>
     </div>
-    <div class="tab-item" onclick="location.href='calendar.html'">
+    <div class="tab-item" onclick="App.confirmLeave('calendar.html')">
         <img src="images/calendar.png" alt="日历" class="tab-icon-img">
         <span class="tab-label">日历</span>
     </div>
-    <div class="tab-item active" onclick="location.href='record.html'">
+    <div class="tab-item active" onclick="App.confirmLeave('record.html')">
         <img src="images/record.png" alt="记录" class="tab-icon-img">
         <span class="tab-label">记录</span>
     </div>
-    <div class="tab-item" onclick="location.href='stats.html'">
+    <div class="tab-item" onclick="App.confirmLeave('stats.html')">
         <img src="images/stats.png" alt="统计" class="tab-icon-img">
         <span class="tab-label">统计</span>
     </div>
 </nav>
+
+<!-- 离开提示弹窗 -->
+<div id="leaveModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:30px;margin:20px;text-align:center;">
+        <p style="font-size:16px;font-weight:600;margin-bottom:20px;color:#333;">是否保存当前记录？</p>
+        <div style="display:flex;gap:10px;">
+            <button onclick="App.leaveWithoutSave()" style="flex:1;padding:12px;border:2px solid #ddd;border-radius:10px;background:white;font-size:14px;color:#666;">不保存</button>
+            <button onclick="App.leaveWithSave()" style="flex:1;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#88d8b0,#a8e6cf);font-size:14px;color:white;font-weight:600;">保存</button>
+        </div>
+    </div>
+</div>
     </div>
     
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

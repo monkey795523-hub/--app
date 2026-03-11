@@ -27,6 +27,11 @@
   <header class="header">
     <img src="images/logo.png" alt="Logo" class="header-logo">
     <h1>心情日记</h1>
+    <div style="display:flex;gap:8px;margin-top:6px;justify-content:center;">
+        <span id="headerUserName" style="font-size:12px;color:rgba(255,255,255,0.8);"></span>
+        <button id="adminBtn" onclick="location.href='admin.html'" style="display:none;font-size:12px;background:rgba(255,255,255,0.25);border:none;color:white;border-radius:12px;padding:3px 10px;cursor:pointer;">家人监控</button>
+        <button onclick="App.logout()" style="font-size:12px;background:rgba(255,255,255,0.2);border:none;color:white;border-radius:12px;padding:3px 10px;cursor:pointer;">退出</button>
+    </div>
 </header>
         
         <main class="content home-content">
@@ -87,6 +92,10 @@
     </div>
 </nav>
     
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
