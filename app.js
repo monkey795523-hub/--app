@@ -223,6 +223,9 @@ const App = {
             this.currentMonth.setMonth(this.currentMonth.getMonth() + 1);
             this.renderCalendar(this.currentMonth);
         });
+        
+        this.calendarClickTimer = null;
+        this.lastClickTime = 0;
     },
     
     renderCalendar(month) {
@@ -283,23 +286,20 @@ const App = {
                     cell.appendChild(dot);
                 }
                 
-                let clickTimer = null;
-                let lastClickTime = 0;
-                
-                cell.addEventListener('click', (e) => {
+                cell.addEventListener('click', () => {
                     const now = Date.now();
-                    const timeDiff = now - lastClickTime;
+                    const timeDiff = now - this.lastClickTime;
                     
                     if (timeDiff < 250 && timeDiff > 0) {
-                        clearTimeout(clickTimer);
+                        clearTimeout(this.calendarClickTimer);
                         this.goToRecord(dateStr);
-                        lastClickTime = 0;
+                        this.lastClickTime = 0;
                     } else {
-                        clearTimeout(clickTimer);
-                        clickTimer = setTimeout(() => {
+                        clearTimeout(this.calendarClickTimer);
+                        this.calendarClickTimer = setTimeout(() => {
                             this.showDayDetail(dateStr, record);
                         }, 250);
-                        lastClickTime = now;
+                        this.lastClickTime = now;
                     }
                 });
             }
