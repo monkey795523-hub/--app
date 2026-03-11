@@ -66,6 +66,7 @@ const App = {
     
     initRecord() {
         this.recordSaved = false;
+        this.formDirty = false;
         this.leaveTarget = null;
         const selectedDate = localStorage.getItem('selectedDate');
         if (selectedDate) {
@@ -89,6 +90,20 @@ const App = {
         
         this.bindSliders();
         this.bindForm();
+        this.watchFormChanges();
+    },
+    
+    // 监听表单任意改动，标记 formDirty
+    watchFormChanges() {
+        const form = document.getElementById('recordForm');
+        if (!form) return;
+        const handler = () => { this.formDirty = true; };
+        form.addEventListener('input', handler);
+        form.addEventListener('change', handler);
+        // 情绪标签点击单独处理（tag 点击不会触发 input/change）
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('click', () => { this.formDirty = true; });
+        });
     },
     
     bindSliders() {
@@ -110,7 +125,7 @@ const App = {
             const ok = this.doSave();
             if (ok) {
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'calendar.html';
                 }, 1000);
             }
         });
@@ -191,7 +206,7 @@ const App = {
     saveRecord() {
         const ok = this.doSave();
         if (ok) {
-            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+            setTimeout(() => { window.location.href = 'calendar.html'; }, 1000);
         }
     },
     
@@ -633,7 +648,8 @@ const App = {
     
     confirmLeave(url) {
         this.leaveTarget = url;
-        if (this.recordSaved) {
+        // 已保存或表单未改动，直接跳转
+        if (this.recordSaved || !this.formDirty) {
             window.location.href = url;
             return;
         }
