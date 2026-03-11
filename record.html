@@ -198,23 +198,34 @@
         </main>
         
        <nav class="tab-bar">
-    <div class="tab-item" onclick="location.href='index.html'">
+    <div class="tab-item" onclick="App.confirmLeave('index.html')">
         <img src="images/home.png" alt="首页" class="tab-icon-img">
         <span class="tab-label">首页</span>
     </div>
-    <div class="tab-item" onclick="location.href='calendar.html'">
+    <div class="tab-item" onclick="App.confirmLeave('calendar.html')">
         <img src="images/calendar.png" alt="日历" class="tab-icon-img">
         <span class="tab-label">日历</span>
     </div>
-    <div class="tab-item active" onclick="location.href='record.html'">
+    <div class="tab-item active" onclick="App.confirmLeave('record.html')">
         <img src="images/record.png" alt="记录" class="tab-icon-img">
         <span class="tab-label">记录</span>
     </div>
-    <div class="tab-item" onclick="location.href='stats.html'">
+    <div class="tab-item" onclick="App.confirmLeave('stats.html')">
         <img src="images/stats.png" alt="统计" class="tab-icon-img">
         <span class="tab-label">统计</span>
     </div>
 </nav>
+
+<!-- 离开提示弹窗 -->
+<div id="leaveModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:30px;margin:20px;text-align:center;">
+        <p style="font-size:16px;font-weight:600;margin-bottom:20px;color:#333;">是否保存当前记录？</p>
+        <div style="display:flex;gap:10px;">
+            <button onclick="App.leaveWithoutSave()" style="flex:1;padding:12px;border:2px solid #ddd;border-radius:10px;background:white;font-size:14px;color:#666;">不保存</button>
+            <button onclick="App.leaveWithSave()" style="flex:1;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#88d8b0,#a8e6cf);font-size:14px;color:white;font-weight:600;">保存</button>
+        </div>
+    </div>
+</div>
     </div>
     
     <script src="app.js"></script>

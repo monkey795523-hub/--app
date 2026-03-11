@@ -65,6 +65,8 @@ const App = {
     },
     
     initRecord() {
+        this.recordSaved = false;
+        this.leaveTarget = null;
         const selectedDate = localStorage.getItem('selectedDate');
         if (selectedDate) {
             this.currentRecordDate = selectedDate;
@@ -107,6 +109,7 @@ const App = {
     
     saveRecord() {
         const dateStr = this.currentRecordDate;
+        const now = new Date();
         const symptoms = [];
         document.querySelectorAll('input[name="symptom"]:checked').forEach(cb => {
             symptoms.push(cb.value);
@@ -125,7 +128,7 @@ const App = {
         
         const record = {
             date: dateStr,
-            timestamp: today.getTime(),
+            timestamp: now.getTime(),
             mood: parseInt(document.getElementById('mood').value),
             energy: parseInt(document.getElementById('energy').value),
             sleep: {
@@ -152,9 +155,9 @@ const App = {
         
         this.setRecord(dateStr, record);
         this.showToast('保存成功！');
+        this.recordSaved = true;
         
         setTimeout(() => {
-            localStorage.removeItem('selectedDate');
             window.location.href = 'index.html';
         }, 1000);
     },
@@ -528,6 +531,31 @@ const App = {
     goToRecord(dateStr) {
         localStorage.setItem('selectedDate', dateStr);
         window.location.href = 'record.html';
+    },
+    
+    confirmLeave(url) {
+        this.leaveTarget = url;
+        if (this.recordSaved) {
+            window.location.href = url;
+            return;
+        }
+        const modal = document.getElementById('leaveModal');
+        if (modal) {
+            modal.style.display = 'flex';
+        } else {
+            window.location.href = url;
+        }
+    },
+    
+    leaveWithSave() {
+        this.saveRecord();
+        setTimeout(() => {
+            window.location.href = this.leaveTarget || 'index.html';
+        }, 800);
+    },
+    
+    leaveWithoutSave() {
+        window.location.href = this.leaveTarget || 'index.html';
     }
 };
 
