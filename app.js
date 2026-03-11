@@ -65,9 +65,19 @@ const App = {
     },
     
     initRecord() {
-        const today = new Date();
-        const dateStr = this.formatDate(today);
-        document.getElementById('recordDate').textContent = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+        let dateStr = null;
+        
+        const selectedDate = localStorage.getItem('selectedDate');
+        if (selectedDate) {
+            dateStr = selectedDate;
+            localStorage.removeItem('selectedDate');
+        } else {
+            const today = new Date();
+            dateStr = this.formatDate(today);
+        }
+        
+        const dateObj = new Date(dateStr);
+        document.getElementById('recordDate').textContent = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
         
         const existingRecord = this.getRecord(dateStr);
         if (existingRecord) {
@@ -75,7 +85,7 @@ const App = {
         }
         
         this.bindSliders();
-        this.bindForm();
+        this.bindForm(dateStr);
     },
     
     bindSliders() {
@@ -90,18 +100,15 @@ const App = {
         });
     },
     
-    bindForm() {
+    bindForm(dateStr) {
         const form = document.getElementById('recordForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            this.saveRecord();
+            this.saveRecord(dateStr);
         });
     },
     
-    saveRecord() {
-        const today = new Date();
-        const dateStr = this.formatDate(today);
-        
+    saveRecord(dateStr) {
         const symptoms = [];
         document.querySelectorAll('input[name="symptom"]:checked').forEach(cb => {
             symptoms.push(cb.value);
@@ -149,6 +156,7 @@ const App = {
         this.showToast('保存成功！');
         
         setTimeout(() => {
+            localStorage.removeItem('selectedDate');
             window.location.href = 'index.html';
         }, 1000);
     },
@@ -275,8 +283,16 @@ const App = {
                     cell.appendChild(dot);
                 }
                 
+                let clickTimer = null;
                 cell.addEventListener('click', () => {
-                    this.showDayDetail(dateStr, record);
+                    clickTimer = setTimeout(() => {
+                        this.showDayDetail(dateStr, record);
+                    }, 250);
+                });
+                
+                cell.addEventListener('dblclick', () => {
+                    clearTimeout(clickTimer);
+                    this.goToRecord(dateStr);
                 });
             }
             
@@ -498,6 +514,11 @@ const App = {
         document.body.appendChild(toast);
         toast.classList.add('show');
         setTimeout(() => toast.remove(), 2000);
+    },
+    
+    goToRecord(dateStr) {
+        localStorage.setItem('selectedDate', dateStr);
+        window.location.href = 'record.html';
     }
 };
 
