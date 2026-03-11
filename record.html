@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>今日记录</title>
+   <link rel="stylesheet" href="style.css">
+<style>
+    .tab-icon-img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+    }
+</style>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>今日记录</h1>
+            <div class="date-display" id="recordDate"></div>
+        </header>
+        
+        <main class="content record-content">
+            <form id="recordForm">
+                <div class="form-section">
+                    <h3 class="section-title">😊 主观感受</h3>
+                    <div class="slider-container">
+                        <input type="range" id="mood" min="0" max="10" value="5" class="slider">
+                        <div class="slider-value">
+                            <span id="moodValue">5</span>
+                            <span class="slider-label">0 - 极度低落 → 10 - 极度开心</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">⚡ 精力水平</h3>
+                    <div class="slider-container">
+                        <input type="range" id="energy" min="0" max="10" value="5" class="slider">
+                        <div class="slider-value">
+                            <span id="energyValue">5</span>
+                            <span class="slider-label">0 - 精疲力竭 → 10 - 精力充沛</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">😴 睡眠质量</h3>
+                    <div class="sleep-grid">
+                        <div class="sleep-item">
+                            <label>入睡难度</label>
+                            <select id="sleepDifficulty" class="select-input">
+                                <option value="0">容易</option>
+                                <option value="1">一般</option>
+                                <option value="2">困难</option>
+                            </select>
+                        </div>
+                        <div class="sleep-item">
+                            <label>睡眠时长 (小时)</label>
+                            <input type="number" id="sleepDuration" min="0" max="24" step="0.5" value="7" class="number-input">
+                        </div>
+                        <div class="sleep-item checkbox-group">
+                            <label>
+                                <input type="checkbox" id="earlyWake"> 早醒
+                            </label>
+                        </div>
+                        <div class="sleep-item checkbox-group">
+                            <label>
+                                <input type="checkbox" id="nightmare"> 噩梦
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">💭 欲望等级</h3>
+                    <div class="desire-grid">
+                        <div class="desire-item">
+                            <label>食欲</label>
+                            <input type="range" id="appetite" min="0" max="10" value="5" class="slider-small">
+                            <span id="appetiteValue">5</span>
+                        </div>
+                        <div class="desire-item">
+                            <label>做事欲</label>
+                            <input type="range" id="motivation" min="0" max="10" value="5" class="slider-small">
+                            <span id="motivationValue">5</span>
+                        </div>
+                        <div class="desire-item">
+                            <label>社交欲</label>
+                            <input type="range" id="social" min="0" max="10" value="5" class="slider-small">
+                            <span id="socialValue">5</span>
+                        </div>
+                        <div class="desire-item">
+                            <label>身体欲望</label>
+                            <input type="range" id="physical" min="0" max="10" value="5" class="slider-small">
+                            <span id="physicalValue">5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">💥 今日触发</h3>
+                    <div class="trigger-tags" id="triggerTags">
+                        <span class="tag" data-type="trigger" data-value="人">👤 人</span>
+                        <span class="tag" data-type="trigger" data-value="事">📋 事</span>
+                        <span class="tag" data-type="trigger" data-value="场景">🏠 场景</span>
+                        <span class="tag" data-type="trigger" data-value="声音">🔊 声音</span>
+                        <span class="tag" data-type="trigger" data-value="回忆">💭 回忆</span>
+                    </div>
+                    <textarea id="triggerDesc" placeholder="描述触发源（可选）" class="textarea-input"></textarea>
+                    
+                    <div class="impact-level">
+                        <label>影响程度</label>
+                        <div class="impact-options">
+                            <label class="radio-option">
+                                <input type="radio" name="impact" value="炸"> 🔥 炸
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="impact" value="沉"> 💧 沉
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="impact" value="僵"> 🧊 僵
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">💢 躯体症状</h3>
+                    <div class="symptom-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="心慌"> ❤️ 心慌
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="胸闷"> 🫁 胸闷
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="胃痛"> 🤢 胃痛
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="发抖"> 🫨 发抖
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="发冷"> 🥶 发冷
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="发麻"> ⚡ 发麻
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="疲惫"> 😫 疲惫
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="symptom" value="头痛"> 🤕 头痛
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">💊 应对方式</h3>
+                    <textarea id="coping" placeholder="今天做了什么来应对？（深呼吸、运动、倾诉...）" class="textarea-input"></textarea>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">✨ 今日小亮点</h3>
+                    <textarea id="highlight" placeholder="今天有什么值得开心的小事？" class="textarea-input"></textarea>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">⚖️ 体重记录</h3>
+                    <div class="weight-input">
+                        <input type="number" id="weight" min="0" max="200" step="0.1" placeholder="kg" class="number-input">
+                        <span class="input-unit">kg</span>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h3 class="section-title">🩸 月经记录</h3>
+                    <div class="period-options">
+                        <label class="radio-option">
+                            <input type="radio" name="period" value="start"> 🩸 开始
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="period" value="during"> ● 进行中
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="period" value="end"> ✅ 结束
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="period" value="none" checked> 无
+                        </label>
+                    </div>
+                    <div class="period-predict" id="periodPredict"></div>
+                </div>
+                
+                <button type="submit" class="submit-btn">保存记录</button>
+            </form>
+        </main>
+        
+       <nav class="tab-bar">
+    <div class="tab-item" onclick="location.href='index.html'">
+        <img src="images/home.png" alt="首页" class="tab-icon-img">
+        <span class="tab-label">首页</span>
+    </div>
+    <div class="tab-item" onclick="location.href='calendar.html'">
+        <img src="images/calendar.png" alt="日历" class="tab-icon-img">
+        <span class="tab-label">日历</span>
+    </div>
+    <div class="tab-item active" onclick="location.href='record.html'">
+        <img src="images/record.png" alt="记录" class="tab-icon-img">
+        <span class="tab-label">记录</span>
+    </div>
+    <div class="tab-item" onclick="location.href='stats.html'">
+        <img src="images/stats.png" alt="统计" class="tab-icon-img">
+        <span class="tab-label">统计</span>
+    </div>
+</nav>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
