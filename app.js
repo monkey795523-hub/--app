@@ -508,19 +508,30 @@ const App = {
     },
     
     calculateScore(record) {
-        const mood = record.mood || 5;
-        const energy = record.energy || 5;
-        const sleepScore = 10 - (record.sleep?.difficulty || 0) * 2;
-        const desireAvg = record.desires ? 
-            (record.desires.appetite + record.desires.motivation + record.desires.social + record.desires.physical) / 4 : 5;
+        // 修复：用 !== undefined 判断，允许 0 为有效分数
+        const mood = record.mood !== undefined ? record.mood : 5;
+        const energy = record.energy !== undefined ? record.energy : 5;
+        
+        // 睡眠难度得分：0=容易(10), 1=一般(6), 2=困难(2)
+        const diffScore = record.sleep?.difficulty !== undefined ?
+            [10, 6, 2][record.sleep.difficulty] : 7;
+        // 睡眠时长得分：7-8小时最佳，过短或过长减分
+        const duration = record.sleep?.duration ?? 7;
+        const durScore = duration === 0 ? 0 : Math.max(0, Math.min(10, 10 - Math.abs(duration - 7.5) * 1.2));
+        const sleepScore = (diffScore + durScore) / 2;
+        
+        // 欲望均値：0 为有效分数
+        const d = record.desires;
+        const desireAvg = d ?
+            ((d.appetite ?? 0) + (d.motivation ?? 0) + (d.social ?? 0) + (d.physical ?? 0)) / 4 : 5;
         
         const symptomPenalty = (record.symptoms?.length || 0) * 0.5;
-        const impactBonus = record.impact ? (record.impact === '炸' ? -2 : record.impact === '沉' ? -1 : 0) : 0;
+        const impactBonus = record.impact === '炸' ? -2 :
+                            record.impact === '沉' ? -1.5 :
+                            record.impact === '僵' ? -0.5 : 0;
         
         let score = (mood + energy + sleepScore + desireAvg) / 4 - symptomPenalty + impactBonus;
-        score = Math.max(0, Math.min(10, score));
-        
-        return score;
+        return Math.max(0, Math.min(10, score));
     },
     
     getRecord(dateStr) {
