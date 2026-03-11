@@ -100,15 +100,15 @@ const App = {
         });
     },
     
-    bindForm(dateStr) {
+    bindForm(currentDateStr) {
         const form = document.getElementById('recordForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            this.saveRecord(dateStr);
+            this.saveRecord(currentDateStr);
         });
     },
     
-    saveRecord(dateStr) {
+    saveRecord(currentDateStr) {
         const symptoms = [];
         document.querySelectorAll('input[name="symptom"]:checked').forEach(cb => {
             symptoms.push(cb.value);
@@ -152,7 +152,7 @@ const App = {
             period: period
         };
         
-        this.setRecord(dateStr, record);
+        this.setRecord(currentDateStr, record);
         this.showToast('保存成功！');
         
         setTimeout(() => {
