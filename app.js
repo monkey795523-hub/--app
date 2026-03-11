@@ -72,8 +72,12 @@ const App = {
             this.currentRecordDate = selectedDate;
             localStorage.removeItem('selectedDate');
         } else {
-            this.currentRecordDate = this.formatDate(new Date());
+            // 如果页面重载（手机后台销毁），从备份中恢复日期
+            const backup = localStorage.getItem('currentRecordDate');
+            this.currentRecordDate = backup || this.formatDate(new Date());
         }
+        // 始终把当前记录日期备份到 localStorage
+        localStorage.setItem('currentRecordDate', this.currentRecordDate);
         
         const dateObj = new Date(this.currentRecordDate);
         document.getElementById('recordDate').textContent = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`;
@@ -115,7 +119,8 @@ const App = {
     // 核心保存函数，只负责保存，不负责跳转，返回是否成功
     doSave() {
         try {
-            const dateStr = this.currentRecordDate;
+            // 从内存或 localStorage 备份中取日期，防止页面重载导致丢失
+            const dateStr = this.currentRecordDate || localStorage.getItem('currentRecordDate') || this.formatDate(new Date());
             if (!dateStr) {
                 alert('保存失败：日期丢失，请重新进入记录页面');
                 return false;
@@ -160,7 +165,9 @@ const App = {
                 period: period
             };
             this.setRecord(dateStr, record);
+            this.currentRecordDate = dateStr;
             this.recordSaved = true;
+            localStorage.removeItem('currentRecordDate');
             this.showToast('保存成功！');
             return true;
         } catch (err) {
