@@ -184,7 +184,7 @@
         </div>
     </div>
 
-    <script src="https://static.cloudbase.net/cloudbasejs/2.6.8/cloudbase.full.js"></script>
+    <script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
     <script src="cloudbase-config.js"></script>
     <script>
         // 如果已登录直接跳转
@@ -215,7 +215,7 @@
             if (!username || !password) { showError('请填写用户名和密码'); return; }
             showLoading(true);
             try {
-                await tcbAuth.signInWithUsernameAndPassword(username, password);
+                await tcbAuth.signIn({ username, password });
                 window.location.href = 'index.html';
             } catch(e) {
                 showLoading(false);
@@ -234,7 +234,7 @@
             if (password.length < 8) { showError('密码至少8位，含字母和数字'); return; }
             showLoading(true);
             try {
-                await tcbAuth.signUpWithUsernameAndPassword(username, password);
+                await tcbAuth.signUp({ username, password, name });
                 const loginState = await tcbAuth.getLoginState();
                 const uid = loginState.user.uid;
                 // 判断是否第一个用户（成为管理员）
