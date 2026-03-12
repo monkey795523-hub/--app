@@ -153,8 +153,8 @@
             <!-- 登录表单 -->
             <div id="loginForm">
                 <div class="form-group">
-                    <label>邮箱</label>
-                    <input type="email" id="loginEmail" placeholder="请输入邮箱">
+                    <label>用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名">
                 </div>
                 <div class="form-group">
                     <label>密码</label>
@@ -166,15 +166,15 @@
             <!-- 注册表单 -->
             <div id="registerForm" style="display:none">
                 <div class="form-group">
-                    <label>昵称</label>
-                    <input type="text" id="regName" placeholder="你的名字（如：妈妈）">
+                    <label>昵称（显示用）</label>
+                    <input type="text" id="regName" placeholder="如：妈妈、小明">
                 </div>
                 <div class="form-group">
-                    <label>邮箱</label>
-                    <input type="email" id="regEmail" placeholder="请输入邮箱">
+                    <label>用户名（登录用，字母数字）</label>
+                    <input type="text" id="regUsername" placeholder="4-20位字母数字">
                 </div>
                 <div class="form-group">
-                    <label>密码（至少6位）</label>
+                    <label>密码（至少8位含字母和数字）</label>
                     <input type="password" id="regPassword" placeholder="请设置密码">
                 </div>
                 <button class="btn-primary" onclick="doRegister()">注册并登录</button>
@@ -184,15 +184,14 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <script src="https://static.cloudbase.net/cloudbasejs/2.6.8/cloudbase.full.js"></script>
+    <script src="cloudbase-config.js"></script>
     <script>
         // 如果已登录直接跳转
-        auth.onAuthStateChanged((user) => {
-            if (user) window.location.href = 'index.html';
-        });
+        (async () => {
+            const loginState = await tcbAuth.getLoginState();
+            if (loginState) window.location.href = 'index.html';
+        })();
 
         function switchTab(tab) {
             document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
@@ -207,56 +206,57 @@
         }
 
         function showError(msg) {
-            const errMap = {
-                'auth/invalid-email': '邮箱格式不正确',
-                'auth/user-not-found': '账号不存在',
-                'auth/wrong-password': '密码错误',
-                'auth/invalid-credential': '邮箱或密码错误',
-                'auth/email-already-in-use': '该邮箱已被注册',
-                'auth/weak-password': '密码至少需要6位',
-                'auth/network-request-failed': '网络连接失败，请检查网络'
-            };
-            document.getElementById('errorMsg').textContent = errMap[msg] || msg;
+            document.getElementById('errorMsg').textContent = msg;
         }
 
         async function doLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
-            if (!email || !password) { showError('请填写邮箱和密码'); return; }
+            if (!username || !password) { showError('请填写用户名和密码'); return; }
             showLoading(true);
             try {
-                await auth.signInWithEmailAndPassword(email, password);
+                await tcbAuth.signInWithUsernameAndPassword(username, password);
                 window.location.href = 'index.html';
             } catch(e) {
                 showLoading(false);
-                showError(e.code);
+                const msg = e.message || '';
+                if (msg.includes('not found') || msg.includes('invalid')) showError('用户名或密码错误');
+                else showError('登录失败：' + msg);
             }
         }
 
         async function doRegister() {
             const name = document.getElementById('regName').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
             const password = document.getElementById('regPassword').value;
             if (!name) { showError('请填写昵称'); return; }
-            if (!email || !password) { showError('请填写邮箱和密码'); return; }
+            if (!username || username.length < 4) { showError('用户名至少4位'); return; }
+            if (password.length < 8) { showError('密码至少8位，含字母和数字'); return; }
             showLoading(true);
             try {
-                const cred = await auth.createUserWithEmailAndPassword(email, password);
-                const uid = cred.user.uid;
+                await tcbAuth.signUpWithUsernameAndPassword(username, password);
+                const loginState = await tcbAuth.getLoginState();
+                const uid = loginState.user.uid;
                 // 判断是否第一个用户（成为管理员）
-                const userListSnap = await db.collection('userList').limit(1).get();
-                const isAdmin = userListSnap.empty;
+                let isAdmin = false;
+                try {
+                    const existing = await tcbDb.collection('userList').limit(1).get();
+                    isAdmin = !existing.data || existing.data.length === 0;
+                } catch(e) { isAdmin = false; }
                 // 保存用户信息
-                await db.collection('userList').doc(uid).set({
+                await tcbDb.collection('userList').doc(uid).set({
                     displayName: name,
-                    email: email,
+                    username: username,
                     isAdmin: isAdmin,
                     createdAt: Date.now()
                 });
                 window.location.href = 'index.html';
             } catch(e) {
                 showLoading(false);
-                showError(e.code);
+                const msg = e.message || '';
+                if (msg.includes('already exists') || msg.includes('username')) showError('该用户名已被注册');
+                else if (msg.includes('password')) showError('密码需8-32位，包含字母和数字');
+                else showError('注册失败：' + msg);
             }
         }
 

@@ -162,66 +162,63 @@
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <script src="https://static.cloudbase.net/cloudbasejs/2.6.8/cloudbase.full.js"></script>
+    <script src="cloudbase-config.js"></script>
     <script>
-        let currentAdmin = null;
-
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) { window.location.href = 'login.html'; return; }
-            currentAdmin = user;
-
-            // 检查是否管理员
-            const profileDoc = await db.collection('userList').doc(user.uid).get();
-            if (!profileDoc.exists || !profileDoc.data().isAdmin) {
-                document.getElementById('userList').innerHTML = '<div class="loading-tip">⚠️ 无权限访问此页面</div>';
+        (async () => {
+            const loginState = await tcbAuth.getLoginState();
+            if (!loginState) { window.location.href = 'login.html'; return; }
+            const uid = loginState.user.uid;
+            try {
+                const profileRes = await tcbDb.collection('userList').doc(uid).get();
+                if (!profileRes.data || !profileRes.data.isAdmin) {
+                    document.getElementById('userList').innerHTML = '<div class="loading-tip">⚠️ 无权限访问此页面</div>';
+                    return;
+                }
+            } catch(e) {
+                document.getElementById('userList').innerHTML = '<div class="loading-tip">加载失败</div>';
                 return;
             }
-
             loadUsers();
-        });
+        })();
 
         async function loadUsers() {
-            const snap = await db.collection('userList').orderBy('createdAt').get();
-            const listEl = document.getElementById('userList');
-            listEl.innerHTML = '';
-
-            if (snap.empty) {
-                listEl.innerHTML = '<div class="loading-tip">暂无家人数据</div>';
-                return;
-            }
-
-            for (const doc of snap.docs) {
-                const data = doc.data();
-                const uid = doc.id;
-
-                // 获取记录数和最近评分
-                let recordCount = 0;
-                let avgScore = '--';
-                try {
-                    const recSnap = await db.collection('users').doc(uid).collection('records').get();
-                    recordCount = recSnap.size;
-                    if (recordCount > 0) {
-                        let total = 0;
-                        recSnap.forEach(r => { total += calcScore(r.data()); });
-                        avgScore = (total / recordCount).toFixed(1);
-                    }
-                } catch(e) {}
-
-                const card = document.createElement('div');
-                card.className = 'user-card';
-                card.onclick = () => openDetail(uid, data.displayName);
-                card.innerHTML = `
-                    <div class="user-avatar">${data.displayName ? data.displayName[0] : '?'}</div>
-                    <div class="user-info">
-                        <div class="user-name">${data.displayName || data.email}${data.isAdmin ? ' 👑' : ''}</div>
-                        <div class="user-stats">记录 ${recordCount} 天</div>
-                    </div>
-                    <div class="user-score">${avgScore}</div>
-                `;
-                listEl.appendChild(card);
+            try {
+                const res = await tcbDb.collection('userList').get();
+                const listEl = document.getElementById('userList');
+                listEl.innerHTML = '';
+                if (!res.data || res.data.length === 0) {
+                    listEl.innerHTML = '<div class="loading-tip">暂无家人数据</div>';
+                    return;
+                }
+                for (const user of res.data) {
+                    const uid = user._id;
+                    let recordCount = 0;
+                    let avgScore = '--';
+                    try {
+                        const recRes = await tcbDb.collection('moodRecords').where({ userId: uid }).get();
+                        recordCount = recRes.data ? recRes.data.length : 0;
+                        if (recordCount > 0) {
+                            let total = 0;
+                            recRes.data.forEach(r => { total += calcScore(r); });
+                            avgScore = (total / recordCount).toFixed(1);
+                        }
+                    } catch(e) {}
+                    const card = document.createElement('div');
+                    card.className = 'user-card';
+                    card.onclick = () => openDetail(uid, user.displayName);
+                    card.innerHTML = `
+                        <div class="user-avatar">${user.displayName ? user.displayName[0] : '?'}</div>
+                        <div class="user-info">
+                            <div class="user-name">${user.displayName || user.username}${user.isAdmin ? ' 👑' : ''}</div>
+                            <div class="user-stats">记录 ${recordCount} 天</div>
+                        </div>
+                        <div class="user-score">${avgScore}</div>
+                    `;
+                    listEl.appendChild(card);
+                }
+            } catch(e) {
+                document.getElementById('userList').innerHTML = '<div class="loading-tip">加载失败: ' + e.message + '</div>';
             }
         }
 
@@ -229,26 +226,24 @@
             document.getElementById('detailName').textContent = name + ' 的记录';
             document.getElementById('detailContent').innerHTML = '<div class="loading-tip">加载中...</div>';
             document.getElementById('detailPanel').classList.add('show');
-
             try {
-                const snap = await db.collection('users').doc(uid).collection('records')
-                    .orderBy('date', 'desc').limit(30).get();
-
+                const res = await tcbDb.collection('moodRecords')
+                    .where({ userId: uid })
+                    .orderBy('date', 'desc')
+                    .limit(30).get();
                 const content = document.getElementById('detailContent');
-                if (snap.empty) {
+                if (!res.data || res.data.length === 0) {
                     content.innerHTML = '<div class="loading-tip">暂无记录</div>';
                     return;
                 }
-
                 content.innerHTML = '';
-                snap.forEach(doc => {
-                    const r = doc.data();
+                res.data.forEach(r => {
                     const score = calcScore(r).toFixed(1);
                     const emotions = (r.emotions || []).join(' · ') || '未填写';
                     const item = document.createElement('div');
                     item.className = 'record-item';
                     item.innerHTML = `
-                        <div class="record-date">${r.date || doc.id}</div>
+                        <div class="record-date">${r.date || r._id}</div>
                         <div class="record-scores">
                             <div class="score-badge">综合 <span>${score}</span></div>
                             <div class="score-badge">心情 <span>${r.mood ?? '--'}</span></div>

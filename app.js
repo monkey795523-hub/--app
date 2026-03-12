@@ -635,12 +635,14 @@ const App = {
         const records = JSON.parse(localStorage.getItem(this.getStorageKey()) || '{}');
         records[dateStr] = record;
         localStorage.setItem(this.getStorageKey(), JSON.stringify(records));
-        // 同步到 Firestore
-        if (this.currentUser && typeof db !== 'undefined') {
-            db.collection('users').doc(this.currentUser.uid)
-              .collection('records').doc(dateStr)
-              .set(record)
-              .catch(e => console.error('Firestore写入失败:', e));
+        // 同步到 CloudBase
+        if (this.currentUser && typeof tcbDb !== 'undefined') {
+            const docId = this.currentUser.uid + '_' + dateStr;
+            tcbDb.collection('moodRecords').doc(docId).set({
+                userId: this.currentUser.uid,
+                date: dateStr,
+                ...record
+            }).catch(e => console.error('CloudBase写入失败:', e));
         }
     },
     
@@ -648,24 +650,33 @@ const App = {
         return JSON.parse(localStorage.getItem(this.getStorageKey()) || '{}');
     },
 
-    // 从 Firestore 同步所有记录到 localStorage
-    async syncFromFirestore() {
-        if (!this.currentUser || typeof db === 'undefined') return;
+    // 从 CloudBase 同步所有记录到 localStorage
+    async syncFromCloudBase() {
+        if (!this.currentUser || typeof tcbDb === 'undefined') return;
         try {
-            const snapshot = await db.collection('users').doc(this.currentUser.uid)
-                .collection('records').get();
+            const res = await tcbDb.collection('moodRecords')
+                .where({ userId: this.currentUser.uid })
+                .limit(1000)
+                .get();
             const records = {};
-            snapshot.forEach(doc => { records[doc.id] = doc.data(); });
+            if (res.data && res.data.length > 0) {
+                res.data.forEach(r => {
+                    const record = Object.assign({}, r);
+                    delete record.userId;
+                    delete record._id;
+                    records[r.date] = record;
+                });
+            }
             localStorage.setItem(this.getStorageKey(), JSON.stringify(records));
             localStorage.setItem('lastSync_' + this.currentUser.uid, Date.now().toString());
         } catch(e) {
-            console.error('Firestore同步失败:', e);
+            console.error('CloudBase同步失败:', e);
         }
     },
 
     logout() {
-        if (typeof auth !== 'undefined') {
-            auth.signOut().then(() => { window.location.href = 'login.html'; });
+        if (typeof tcbAuth !== 'undefined') {
+            tcbAuth.signOut().then(() => { window.location.href = 'login.html'; });
         }
     },
     
@@ -752,42 +763,38 @@ const App = {
     },
 };
 
-// Firebase 身份验证 + 初始化
-if (typeof auth !== 'undefined') {
-    auth.onAuthStateChanged(async (user) => {
+// CloudBase 身份验证 + 初始化
+if (typeof tcbAuth !== 'undefined') {
+    (async () => {
         const path = window.location.pathname;
         const isLoginPage = path.includes('login.html');
-        const isAdminPage = path.includes('admin.html');
-
-        if (!user) {
-            if (!isLoginPage) window.location.href = 'login.html';
-            return;
-        }
-
-        // 设置当前用户
-        App.currentUser = user;
-
-        // 读取用户信息
         try {
-            const profileDoc = await db.collection('userList').doc(user.uid).get();
-            if (profileDoc.exists) {
-                App.isAdmin = profileDoc.data().isAdmin === true;
-                App.displayName = profileDoc.data().displayName || user.email;
+            const loginState = await tcbAuth.getLoginState();
+            if (!loginState) {
+                if (!isLoginPage) window.location.href = 'login.html';
+                return;
             }
-        } catch(e) { console.error('读取用户信息失败', e); }
-
-        // 首次登录自动从 Firestore 同步数据
-        const lastSync = localStorage.getItem('lastSync_' + user.uid);
-        if (!lastSync) {
-            await App.syncFromFirestore();
+            App.currentUser = { uid: loginState.user.uid };
+            try {
+                const res = await tcbDb.collection('userList').doc(loginState.user.uid).get();
+                if (res.data) {
+                    App.isAdmin = res.data.isAdmin === true;
+                    App.displayName = res.data.displayName || loginState.user.uid;
+                }
+            } catch(e) { console.error('读取用户信息失败', e); }
+            const lastSync = localStorage.getItem('lastSync_' + loginState.user.uid);
+            if (!lastSync) {
+                await App.syncFromCloudBase();
+            }
+            if (!isLoginPage) {
+                App.init();
+            }
+        } catch(e) {
+            console.error('Auth error:', e);
+            if (!isLoginPage) window.location.href = 'login.html';
         }
-
-        if (!isLoginPage) {
-            App.init();
-        }
-    });
+    })();
 } else {
-    // 如果没有 Firebase，直接初始化（本地调试用）
     App.init();
 }
 
