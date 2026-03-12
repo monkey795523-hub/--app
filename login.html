@@ -215,7 +215,7 @@
             if (!username || !password) { showError('请填写用户名和密码'); return; }
             showLoading(true);
             try {
-                await tcbAuth.signIn({ username, password });
+                await tcbAuth.signInWithUsername(username, password);
                 window.location.href = 'index.html';
             } catch(e) {
                 showLoading(false);
