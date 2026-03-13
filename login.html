@@ -234,9 +234,10 @@
             if (password.length < 8) { showError('密码至少8位，含字母和数字'); return; }
             showLoading(true);
             try {
-               const state = await tcbAuth.signUp({ username, password });
-let uid = state?.user?.uid;
-if (!uid) { const ls = await tcbAuth.getLoginState(); uid = ls?.user?.uid; }
+              await tcbAuth.signUp({ username, password });
+await tcbAuth.signIn({ username, password });
+const ls = await tcbAuth.getLoginState();
+const uid = ls?.user?.uid;
 if (!uid) { showLoading(false); showError('注册成功，请直接登录'); switchTab('login'); document.getElementById('loginUsername').value = username; return; }
                 // 判断是否第一个用户（成为管理员）
                 let isAdmin = false;
