@@ -234,7 +234,8 @@
             if (password.length < 8) { showError('密码至少8位，含字母和数字'); return; }
             showLoading(true);
             try {
-            const regResult = await tcbApp.callFunction({ name: 'registerUser', data: { username, password, nickName: name } });
+           await tcbAuth.anonymousAuthProvider().signIn();
+         const regResult = await tcbApp.callFunction({ name: 'registerUser', data: { username, password, nickName: name } });
 if (!regResult.result.success) throw new Error(regResult.result.error || '注册失败');
 await tcbAuth.signIn({ username, password });
 const ls = await tcbAuth.getLoginState();
